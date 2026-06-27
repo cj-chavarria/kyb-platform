@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PersonaMoral {
+  id              String   @id @default(cuid())
+  rfc             String   @unique
+  razonSocial     String
+  domicilioFiscal String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  expedientes Expediente[]
+}
+
+model RepresentanteLegal {
+  id               String  @id @default(cuid())
+  expedienteId     String
+  nombre           String
+  cargo            String?
+  rfc              String?
+  identificacionId String?
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+
+  @@index([expedienteId])
+}
+
+model SocioAccionista {
+  id           String  @id @default(cuid())
+  expedienteId String
+  nombre       String
+  rfc          String?
+  porcentaje   Float?
+  tipo         String
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+
+  @@index([expedienteId])
+}
+
+model BeneficiarioControlador {
+  id           String  @id @default(cuid())
+  expedienteId String
+  nombre       String
+  rfc          String?
+  porcentaje   Float?
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+
+  @@index([expedienteId])
+}
+
+model Expediente {
+  id             String   @id @default(cuid())
+  personaMoralId String
+  status         String   @default("draft")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  personaMoral    PersonaMoral            @relation(fields: [personaMoralId], references: [id])
+  documentos      Documento[]
+  representantes  RepresentanteLegal[]
+  socios          SocioAccionista[]
+  beneficiarios   BeneficiarioControlador[]
+  consultas       ConsultaListaFiscal[]
+  discrepancias   Discrepancia[]
+  riskAssessments RiskAssessment[]
+  auditLogs       AuditLog[]
+
+  @@index([personaMoralId])
+}
+
+enum DocumentType {
+  acta_constitutiva
+  identificacion_representante
+  poder_representacion
+  comprobante_domicilio
+  rfc
+  constancia_situacion_fiscal
+  manifestacion_protesta
+  socios_accionistas
+  beneficiario_controlador
+  otro
+}
+
+model Documento {
+  id                 String       @id @default(cuid())
+  expedienteId       String
+  tipo               DocumentType
+  fileUrl            String?
+  fileName           String?
+  fileHash           String?
+  fechaEmision       DateTime?
+  fechaVencimiento   DateTime?
+  rfcEnDoc           String?
+  razonSocialEnDoc   String?
+  domicilioEnDoc     String?
+  representanteEnDoc String?
+  emitidoPor         String?
+  observaciones      String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+
+  @@index([expedienteId])
+}
+
+enum ListadoFiscal {
+  ART_69
+  ART_69_B
+  ART_69_B_BIS
+  ART_49_BIS
+}
+
+model ConsultaListaFiscal {
+  id            String        @id @default(cuid())
+  expedienteId  String
+  rfc           String
+  listado       ListadoFiscal
+  resultado     String
+  detalle       String?
+  fuenteUrl     String
+  fechaHora     DateTime      @default(now())
+  referencia    String
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+
+  @@index([expedienteId])
+  @@index([rfc])
+}
+
+model Discrepancia {
+  id              String  @id @default(cuid())
+  expedienteId    String
+  campo           String
+  valorEsperado   String
+  valorEncontrado String
+  documentoOrigen String
+  severidad       String
+  resuelta        Boolean @default(false)
+  createdAt       DateTime @default(now())
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+
+  @@index([expedienteId])
+}
+
+model RiskAssessment {
+  id               String   @id @default(cuid())
+  expedienteId     String
+  score            Int
+  decision         String
+  blocked          Boolean
+  factors          Json
+  suggestedActions Json
+  createdAt        DateTime @default(now())
+
+  expediente Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+
+  @@index([expedienteId])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  expedienteId String?
+  actor        String
+  accion       String
+  entidad      String
+  entityId     String?
+  antes        Json?
+  despues      Json?
+  createdAt    DateTime @default(now())
+
+  expediente Expediente? @relation(fields: [expedienteId], references: [id], onDelete: SetNull)
+
+  @@index([expedienteId])
+}
+
+model SatListRecord {
+  id               String        @id @default(cuid())
+  listado          ListadoFiscal
+  rfc              String
+  razonSocial      String?
+  situacion        String?
+  detalle          String?
+  fuenteUrl        String
+  referencia       String
+  fechaPublicacion DateTime?
+  createdAt        DateTime      @default(now())
+
+  @@index([rfc])
+  @@index([listado])
+}
+
+model FactorConfig {
+  id          String   @id @default(cuid())
+  factorId    String   @unique
+  categoria   String
+  descripcion String
+  puntos      Int
+  direccion   String
+  critico     Boolean  @default(false)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

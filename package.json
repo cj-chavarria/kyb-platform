@@ -1,0 +1,33 @@
+{
+  "name": "kyb-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KYB platform for Mexican customs agencies",
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=web",
+    "dev:api": "cd api && .venv\\Scripts\\activate && uvicorn main:app --reload --port 8000",
+    "build:web": "npm run build --workspace=web",
+    "db:generate": "cd web && npx prisma generate",
+    "db:migrate": "cd web && npx prisma migrate dev",
+    "db:seed": "cd web && npx prisma db seed",
+    "db:studio": "cd web && npx prisma studio",
+    "db:push": "cd web && npx prisma db push",
+    "test:api": "cd api && .venv\\Scripts\\activate && pytest",
+    "lint:web": "npm run lint --workspace=web"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.3.0"
+  },
+  "allowScripts": {
+    "@prisma/engines@6.19.3": true,
+    "prisma@6.19.3": true,
+    "@prisma/client@6.19.3": true,
+    "unrs-resolver@1.12.2": true
+  }
+}
