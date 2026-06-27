@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "installCommand": "npm install --workspaces --include-workspace-root",
-  "buildCommand": "cd web && npm run build",
   "framework": "nextjs",
   "regions": ["iad1"]
 }
