@@ -54,6 +54,11 @@ export default async function ExpedientesPage() {
   return (
     <main className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-6xl space-y-6">
+        <div>
+          <Link href="/" className="text-sm text-muted-foreground hover:underline">
+            ← Inicio
+          </Link>
+        </div>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Expedientes KYB</h1>
