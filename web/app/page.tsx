@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
   return (
@@ -13,31 +13,22 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expedientes</CardTitle>
-              <CardDescription>Crea y gestiona expedientes KYB.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
-                <Link href="/expedientes">Ver expedientes</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Score de riesgo</CardTitle>
-              <CardDescription>Determinista, explicable y testeable.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                Ver metodología
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="flex justify-center pt-2">
+          <Button asChild size="lg">
+            <Link href="/expedientes/nuevo">Añadir nuevo expediente</Link>
+          </Button>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Expedientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/expedientes">Ver expedientes</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );
