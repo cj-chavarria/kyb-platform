@@ -50,6 +50,13 @@ export async function POST(
 
     const satResult = await consultarSat(rfc);
 
+    // Borrar consultas previas del mismo expediente para evitar duplicados.
+    // Cada click en "Consultar SAT" crea 4 registros nuevos; sin esta limpieza
+    // la tabla crece innecesariamente y la UI muestra filas repetidas.
+    await prisma.consultaListaFiscal.deleteMany({
+      where: { expedienteId: params.id },
+    });
+
     const consultas = await Promise.all(
       Object.entries(satResult.articulos).map(async ([articulo, data]) => {
         const listado = ARTICULO_TO_LISTADO[articulo];
