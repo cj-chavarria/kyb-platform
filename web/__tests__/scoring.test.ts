@@ -93,7 +93,7 @@ describe("Scoring engine", () => {
       expect(factor!.points).toBe(40);
     });
 
-    it("Art 49 Bis indirecto con found (CSD sin efectos) suma 60 puntos", () => {
+    it("Art 49 Bis indirecto con found es informativo (0 puntos, sin doble conteo)", () => {
       const result = calculateScore(
         buildInput({
           consultasSat: [
@@ -103,7 +103,8 @@ describe("Scoring engine", () => {
         NOW
       );
       const factor = result.factors.find((f) => f.id === "sat_49bis_indirect_found");
-      expect(factor!.points).toBe(60);
+      expect(factor).toBeDefined();
+      expect(factor!.points).toBe(0);
     });
 
     it("Desvirtuados y Sentencias Favorables suman 0 puntos", () => {

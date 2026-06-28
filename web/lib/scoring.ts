@@ -236,12 +236,14 @@ export function calculateScore(
         );
       }
     } else if (c.listado === "ART_49_BIS") {
-      // Cobertura indirecta: si found, viene de CSD sin efectos / no localizados
+      // Cobertura indirecta: si found, viene de CSD sin efectos / no localizados.
+      // Los puntos ya se suman en Art 69 (sat_69_csd_sin_efectos o sat_69_no_localizados).
+      // Este factor es informativo (0 puntos) para evitar doble conteo.
       factor = mkFactor(
         "sat_49bis_indirect_found",
         "sat_list",
-        `RFC con afectación Art. 49 Bis (cobertura indirecta): ${detalle}`,
-        PESOS.sat_69_csd_sin_efectos
+        `RFC con afectación Art. 49 Bis (cobertura indirecta): ${detalle}. Puntos ya sumados en Art. 69.`,
+        { puntos: 0, critico: false }
       );
     }
 
