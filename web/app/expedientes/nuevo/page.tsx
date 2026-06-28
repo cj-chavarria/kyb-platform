@@ -33,6 +33,11 @@ export default function NuevoExpedientePage() {
 
   async function buscarPorRfc() {
     setError(null);
+    if (!rfc.trim()) {
+      setPersonaEncontrada(null);
+      setPersonaId(null);
+      return;
+    }
     setBuscando(true);
     try {
       const res = await fetch(`/api/personas?rfc=${encodeURIComponent(rfc)}`);
@@ -136,7 +141,6 @@ export default function NuevoExpedientePage() {
                     placeholder="ABC123456X1"
                     required
                     className="font-mono uppercase"
-                    onBlur={buscarPorRfc}
                   />
                   <Button
                     type="button"

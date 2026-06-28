@@ -6,6 +6,13 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const rfc = searchParams.get("rfc");
 
+    if (rfc !== null && rfc.trim() === "") {
+      return NextResponse.json(
+        { error: "rfc no puede estar vacio" },
+        { status: 400 }
+      );
+    }
+
     const personas = await prisma.personaMoral.findMany({
       where: rfc ? { rfc: { equals: rfc.toUpperCase(), mode: "insensitive" } } : undefined,
       orderBy: { createdAt: "desc" },
