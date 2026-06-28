@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   description: "Know Your Business para agencias aduanales mexicanas",
 };
 
+import { Toaster } from "@/components/ui/sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -48,6 +50,7 @@ export default function RootLayout({
         <div className="flex-1">
           {children}
         </div>
+        <Toaster theme="dark" />
       </body>
     </html>
   );

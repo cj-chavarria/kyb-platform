@@ -92,56 +92,58 @@ export default async function ExpedientesPage() {
                 </Button>
               </div>
             ) : (
-              <Table>
-                <TableHeader className="bg-muted/10">
-                  <TableRow className="hover:bg-transparent border-border/50">
-                    <TableHead className="py-4">RFC</TableHead>
-                    <TableHead>Razón social</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-center">Documentos</TableHead>
-                    <TableHead className="text-center">Discrepancias</TableHead>
-                    <TableHead className="text-right pr-6">Creado</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {expedientes.map((exp) => (
-                    <TableRow 
-                      key={exp.id} 
-                      className="group hover:bg-muted/30 border-border/50 transition-colors"
-                    >
-                      <TableCell className="font-mono font-medium">
-                        <Link
-                          href={`/expedientes/${exp.id}`}
-                          className="text-primary hover:text-primary-foreground hover:underline transition-colors block"
-                        >
-                          {exp.personaMoral.rfc}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-foreground/90 font-medium">
-                        {exp.personaMoral.razonSocial}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`font-medium ${STATUS_STYLES[exp.status] ?? STATUS_STYLES.draft}`}>
-                          {STATUS_LABELS[exp.status] ?? exp.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center bg-muted/50 rounded-full h-6 px-3 text-xs font-medium border border-border/50">
-                          {exp._count.documentos}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className={`inline-flex items-center justify-center rounded-full h-6 px-3 text-xs font-medium border ${exp._count.discrepancias > 0 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-muted/50 text-muted-foreground border-border/50'}`}>
-                          {exp._count.discrepancias}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground text-right pr-6">
-                        {new Date(exp.createdAt).toLocaleDateString("es-MX", { year: 'numeric', month: 'short', day: 'numeric' })}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-muted/10">
+                    <TableRow className="hover:bg-transparent border-border/50">
+                      <TableHead className="py-4">RFC</TableHead>
+                      <TableHead>Razón social</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-center">Documentos</TableHead>
+                      <TableHead className="text-center">Discrepancias</TableHead>
+                      <TableHead className="text-right pr-6">Creado</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {expedientes.map((exp) => (
+                      <TableRow 
+                        key={exp.id} 
+                        className="group hover:bg-muted/30 border-border/50 transition-colors"
+                      >
+                        <TableCell className="font-mono font-medium">
+                          <Link
+                            href={`/expedientes/${exp.id}`}
+                            className="text-primary hover:text-primary-foreground hover:underline transition-colors block"
+                          >
+                            {exp.personaMoral.rfc}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-foreground/90 font-medium">
+                          {exp.personaMoral.razonSocial}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={`font-medium ${STATUS_STYLES[exp.status] ?? STATUS_STYLES.draft}`}>
+                            {STATUS_LABELS[exp.status] ?? exp.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center justify-center bg-muted/50 rounded-full h-6 px-3 text-xs font-medium border border-border/50">
+                            {exp._count.documentos}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className={`inline-flex items-center justify-center rounded-full h-6 px-3 text-xs font-medium border ${exp._count.discrepancias > 0 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-muted/50 text-muted-foreground border-border/50'}`}>
+                            {exp._count.discrepancias}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground text-right pr-6">
+                          {new Date(exp.createdAt).toLocaleDateString("es-MX", { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -564,9 +565,12 @@ function ValidacionSection({
         statusChanged: boolean;
       };
       setResult(data);
+      toast.success("Expediente validado correctamente");
       if (data.statusChanged) onChanged();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Error");
+      const errorMsg = e instanceof Error ? e.message : "Error";
+      setErr(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setValidating(false);
     }
@@ -708,9 +712,12 @@ function ListasFiscalesSection({
       }
       const data = (await res.json()) as ConsultaSatUI;
       setResultado(data);
+      toast.success("Listas del SAT consultadas con éxito");
       onChanged();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Error");
+      const errorMsg = e instanceof Error ? e.message : "Error";
+      setErr(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setConsultando(false);
     }
@@ -859,9 +866,12 @@ function ScoringSection({
       }
       const data = (await res.json()) as EvaluacionResultUI;
       setResult(data);
+      toast.success("Evaluación de riesgo completada");
       onChanged();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Error");
+      const errorMsg = e instanceof Error ? e.message : "Error";
+      setErr(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setEvaluating(false);
     }
