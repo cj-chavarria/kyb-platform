@@ -32,9 +32,12 @@ export default function Home() {
               <CardDescription>Determinista, explicable y testeable.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                Ver metodología
-              </Button>
+              <p className="text-sm text-muted-foreground">
+                Motor con factores configurables: listas fiscales del SAT,
+                documentos obligatorios, vigencias, conciliación, completitud y
+                CSF del mes vigente. Decisión: <strong>safe</strong>,{" "}
+                <strong>review_required</strong> u <strong>high_risk</strong>.
+              </p>
             </CardContent>
           </Card>
         </div>
