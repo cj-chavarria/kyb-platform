@@ -101,7 +101,6 @@ const REQUIRED_DOC_TYPES: DocumentType[] = [
   "acta_constitutiva",
   "identificacion_representante",
   "comprobante_domicilio",
-  "rfc",
   "constancia_situacion_fiscal",
   "manifestacion_protesta",
 ];
