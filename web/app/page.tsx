@@ -19,25 +19,16 @@ export default function Home() {
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expedientes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
-                <Link href="/expedientes">Ver expedientes</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Score de riesgo</CardTitle>
-            </CardHeader>
-            <CardContent />
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Expedientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
+              <Link href="/expedientes">Ver expedientes</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );
