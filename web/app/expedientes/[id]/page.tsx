@@ -29,6 +29,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const STATUS_LABELS: Record<string, string> = {
   draft: "Borrador",
@@ -232,7 +242,7 @@ export default function ExpedienteDetallePage() {
           >
             ← Volver a expedientes
           </Link>
-          <div className="mt-2 flex items-start justify-between">
+          <div className="mt-2 flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">
                 {expediente.personaMoral.razonSocial}
@@ -241,9 +251,15 @@ export default function ExpedienteDetallePage() {
                 {expediente.personaMoral.rfc}
               </p>
             </div>
-            <Badge variant={STATUS_VARIANT[expediente.status] ?? "secondary"}>
-              {STATUS_LABELS[expediente.status] ?? expediente.status}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <ReportarCambioDialog
+                expedienteId={expediente.id}
+                onChanged={load}
+              />
+              <Badge variant={STATUS_VARIANT[expediente.status] ?? "secondary"}>
+                {STATUS_LABELS[expediente.status] ?? expediente.status}
+              </Badge>
+            </div>
           </div>
         </div>
 
@@ -1607,7 +1623,7 @@ function AuditLogSection({
         ) : (
           <ul className="space-y-2">
             {logs.map((log) => (
-              <li key={log.id} className="flex items-start gap-3 text-sm">
+                <li key={log.id} className="flex items-start gap-3 text-sm">
                 <span className="text-muted-foreground">
                   {new Date(log.createdAt).toLocaleString("es-MX")}
                 </span>
@@ -1619,5 +1635,109 @@ function AuditLogSection({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function ReportarCambioDialog({
+  expedienteId,
+  onChanged,
+}: {
+  expedienteId: string;
+  onChanged: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [sending, setSending] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [ok, setOk] = useState(false);
+
+  async function enviar() {
+    setSending(true);
+    setErr(null);
+    setOk(false);
+    try {
+      const res = await fetch(
+        `/api/expedientes/${expedienteId}/reportar-cambio`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ motivo, descripcion }),
+        }
+      );
+      if (!res.ok) {
+        const e = await res.json();
+        throw new Error(e.error ?? "Error al reportar cambio");
+      }
+      setOk(true);
+      setMotivo("");
+      setDescripcion("");
+      onChanged();
+      setTimeout(() => {
+        setOpen(false);
+        setOk(false);
+      }, 1500);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        Reportar cambio
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Reportar cambio</DialogTitle>
+          <DialogDescription>
+            Indica qué cambió. El expediente pasará a <strong>requiere actualización</strong>.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          {err && <p className="text-sm text-destructive">{err}</p>}
+          {ok && (
+            <p className="text-sm text-green-600">
+              Cambio reportado. El expediente ahora requiere actualización.
+            </p>
+          )}
+          <div className="space-y-1">
+            <Label htmlFor="rc-motivo">Motivo</Label>
+            <Select value={motivo} onValueChange={(v) => setMotivo(v ?? "")}>
+              <SelectTrigger id="rc-motivo">
+                <SelectValue placeholder="Selecciona un motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cambio_domicilio">Cambio de domicilio</SelectItem>
+                <SelectItem value="cambio_representante">Cambio de representante</SelectItem>
+                <SelectItem value="cambio_razon_social">Cambio de razón social</SelectItem>
+                <SelectItem value="cambio_socios">Cambio de socios/accionistas</SelectItem>
+                <SelectItem value="actualizacion_documentos">Actualización de documentos</SelectItem>
+                <SelectItem value="otro">Otro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="rc-descripcion">Descripción</Label>
+            <Input
+              id="rc-descripcion"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              placeholder="Detalle del cambio (opcional)"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancelar
+          </DialogClose>
+          <Button onClick={enviar} disabled={sending || !motivo}>
+            {sending ? "Enviando..." : "Reportar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
