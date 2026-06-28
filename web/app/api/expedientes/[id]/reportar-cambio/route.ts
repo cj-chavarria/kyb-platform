@@ -10,9 +10,9 @@ export async function POST(
     const body = await req.json();
     const { motivo, descripcion } = body;
 
-    if (!motivo || !descripcion) {
+    if (!motivo) {
       return NextResponse.json(
-        { error: "motivo y descripcion son obligatorios" },
+        { error: "motivo es obligatorio" },
         { status: 400 }
       );
     }
