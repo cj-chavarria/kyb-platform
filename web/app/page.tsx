@@ -13,7 +13,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div>
+        <div className="flex justify-center pt-2">
           <Button asChild size="lg">
             <Link href="/expedientes/nuevo">Añadir nuevo expediente</Link>
           </Button>
@@ -24,7 +24,7 @@ export default function Home() {
             <CardTitle>Expedientes</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full">
+            <Button asChild variant="outline" className="w-full">
               <Link href="/expedientes">Ver expedientes</Link>
             </Button>
           </CardContent>
