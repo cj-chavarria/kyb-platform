@@ -49,16 +49,13 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: "Rechazado",
 };
 
-const STATUS_VARIANT: Record<
-  string,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  draft: "secondary",
-  needs_update: "outline",
-  ready: "default",
-  review_required: "outline",
-  approved: "default",
-  rejected: "destructive",
+const STATUS_STYLES: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground border-transparent",
+  needs_update: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  ready: "bg-[hsl(var(--safe))]/10 text-[hsl(var(--safe))] border-[hsl(var(--safe))]/20",
+  review_required: "bg-[hsl(var(--review))]/10 text-[hsl(var(--review))] border-[hsl(var(--review))]/20",
+  approved: "bg-[hsl(var(--safe))]/20 text-[hsl(var(--safe))] font-bold border-[hsl(var(--safe))]/30",
+  rejected: "bg-[hsl(var(--high-risk))]/10 text-[hsl(var(--high-risk))] border-[hsl(var(--high-risk))]/20",
 };
 
 const DOCUMENT_TYPES: { value: string; label: string }[] = [
@@ -233,32 +230,32 @@ export default function ExpedienteDetallePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <main className="flex-1 p-8 sm:p-12 relative z-10">
+      <div className="mx-auto max-w-6xl space-y-8">
         <div>
           <Link
             href="/expedientes"
-            className="text-sm text-muted-foreground hover:underline"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Volver a expedientes
           </Link>
-          <div className="mt-2 flex items-start justify-between gap-4">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-start justify-between gap-6">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 {expediente.personaMoral.razonSocial}
               </h1>
-              <p className="font-mono text-sm text-muted-foreground">
-                {expediente.personaMoral.rfc}
+              <p className="font-mono text-sm text-muted-foreground mt-1 flex items-center gap-2">
+                RFC: <span className="text-primary font-bold">{expediente.personaMoral.rfc}</span>
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:items-end gap-3 shrink-0">
+              <Badge className={`text-sm py-1.5 px-4 uppercase tracking-wider font-bold shadow-sm ${STATUS_STYLES[expediente.status] ?? STATUS_STYLES.draft}`} variant="outline">
+                {STATUS_LABELS[expediente.status] ?? expediente.status}
+              </Badge>
               <ReportarCambioDialog
                 expedienteId={expediente.id}
                 onChanged={load}
               />
-              <Badge variant={STATUS_VARIANT[expediente.status] ?? "secondary"}>
-                {STATUS_LABELS[expediente.status] ?? expediente.status}
-              </Badge>
             </div>
           </div>
         </div>
@@ -877,160 +874,212 @@ function ScoringSection({
     : null;
 
   const decisionColors: Record<string, string> = {
-    safe: "bg-green-100 text-green-800 border-green-300",
-    review_required: "bg-yellow-100 text-yellow-800 border-yellow-300",
-    high_risk: "bg-red-100 text-red-800 border-red-300",
+    safe: "bg-[hsl(var(--safe))]/20 text-[hsl(var(--safe))] border-[hsl(var(--safe))]/30",
+    review_required: "bg-[hsl(var(--review))]/20 text-[hsl(var(--review))] border-[hsl(var(--review))]/30",
+    high_risk: "bg-[hsl(var(--high-risk))]/20 text-[hsl(var(--high-risk))] border-[hsl(var(--high-risk))]/30",
   };
 
   const decisionLabels: Record<string, string> = {
-    safe: "Operable",
-    review_required: "Requiere revisión",
-    high_risk: "Alto riesgo",
+    safe: "Operable (Bajo Riesgo)",
+    review_required: "Requiere revisión (Riesgo Medio)",
+    high_risk: "Alto riesgo (Inoperable)",
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-[hsl(var(--high-risk))]";
+    if (score > 0) return "text-[hsl(var(--review))]";
+    return "text-[hsl(var(--safe))]";
+  };
+  
+  const getStrokeColor = (score: number) => {
+    if (score >= 80) return "stroke-[hsl(var(--high-risk))]";
+    if (score > 0) return "stroke-[hsl(var(--review))]";
+    return "stroke-[hsl(var(--safe))]";
+  };
+
+  const circleRadius = 42;
+  const circleCircumference = 2 * Math.PI * circleRadius;
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
+    <Card className="bg-card/40 backdrop-blur-md border-border/50 shadow-2xl relative overflow-hidden">
+      {latest && (
+        <div className={`absolute -right-20 -top-20 w-64 h-64 opacity-[0.15] blur-[80px] rounded-full pointer-events-none ${
+          latest.score >= 80 ? 'bg-[hsl(var(--high-risk))]' : latest.score > 0 ? 'bg-[hsl(var(--review))]' : 'bg-[hsl(var(--safe))]'
+        }`} />
+      )}
+
+      <CardHeader className="border-b border-border/50 bg-muted/10 relative z-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <CardTitle>Score de riesgo</CardTitle>
+            <CardTitle className="text-xl">Score de Riesgo</CardTitle>
             <CardDescription>
-              Motor determinista, explicable y testeable.
+              Motor determinista y explicable de evaluación KYC/KYB.
             </CardDescription>
           </div>
-          <Button onClick={evaluar} disabled={evaluating}>
-            {evaluating ? "Evaluando..." : "Evaluar riesgo"}
+          <Button onClick={evaluar} disabled={evaluating} size="lg" className="font-bold tracking-wide shadow-lg shrink-0">
+            {evaluating ? "Evaluando..." : "Evaluar Riesgo"}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {err && <p className="text-sm text-destructive">{err}</p>}
+
+      <CardContent className="p-6 space-y-8 relative z-10">
+        {err && <p className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">{err}</p>}
 
         {!latest && !evaluating && (
-          <p className="text-sm text-muted-foreground">
-            Presiona &quot;Evaluar riesgo&quot; para calcular el score con el motor determinista.
-          </p>
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">
+              Presiona &quot;Evaluar Riesgo&quot; para correr el motor determinista.
+            </p>
+          </div>
         )}
 
         {latest && (
-          <>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-xs text-muted-foreground">Score</p>
-                <p
-                  className={`text-4xl font-bold ${
-                    latest.score >= 80
-                      ? "text-red-600"
-                      : latest.score > 0
-                      ? "text-yellow-600"
-                      : "text-green-600"
-                  }`}
-                >
-                  {latest.score}
-                </p>
-                <p className="text-xs text-muted-foreground">/ 100</p>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
+            <div className="flex flex-col sm:flex-row items-center gap-8 bg-background/50 p-6 rounded-xl border border-border/50 shadow-inner">
+              <div className="relative flex items-center justify-center shrink-0">
+                <svg width="120" height="120" className="transform -rotate-90 drop-shadow-md">
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r={circleRadius}
+                    className="stroke-muted/20 fill-none"
+                    strokeWidth="10"
+                  />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r={circleRadius}
+                    className={`${getStrokeColor(latest.score)} fill-none transition-all duration-1000 ease-out`}
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={circleCircumference}
+                    strokeDashoffset={circleCircumference - ((Math.max(1, latest.score)) / 100) * circleCircumference}
+                  />
+                </svg>
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className={`text-4xl font-black tracking-tighter ${getScoreColor(latest.score)}`}>
+                    {latest.score}
+                  </span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Score</span>
+                </div>
               </div>
-              <div className="rounded-lg border p-4 text-center sm:col-span-2">
-                <p className="text-xs text-muted-foreground">Decisión</p>
-                <Badge
-                  className={`mt-1 ${
-                    decisionColors[latest.decision] ?? ""
-                  }`}
-                  variant="outline"
-                >
-                  {decisionLabels[latest.decision] ?? latest.decision}
-                </Badge>
-                {latest.blocked && (
-                  <p className="mt-2 text-xs text-destructive font-medium">
-                    BLOQUEADO: no se puede aprobar
-                  </p>
-                )}
-              </div>
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-xs text-muted-foreground">Factores</p>
-                <p className="text-2xl font-bold">{latest.factors.length}</p>
-                <p className="text-xs text-muted-foreground">
-                  {latest.factors.filter((f) => f.critical).length} críticos
-                </p>
+
+              <div className="flex-1 space-y-4 text-center sm:text-left w-full">
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Decisión del Motor</p>
+                  <Badge
+                    className={`text-sm py-1.5 px-4 font-bold uppercase tracking-wider shadow-sm ${decisionColors[latest.decision] ?? ""}`}
+                    variant="outline"
+                  >
+                    {decisionLabels[latest.decision] ?? latest.decision}
+                  </Badge>
+                  {latest.blocked && (
+                    <div className="mt-3 inline-flex items-center gap-2 bg-[hsl(var(--high-risk))]/10 px-3 py-1.5 rounded-md border border-[hsl(var(--high-risk))]/20 mx-auto sm:mx-0">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--high-risk))] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--high-risk))]"></span>
+                      </span>
+                      <span className="text-sm text-[hsl(var(--high-risk))] font-bold">BLOQUEADO (Rechazo Automático)</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-center sm:justify-start gap-6 pt-2 border-t border-border/30">
+                  <div>
+                    <p className="text-xl font-bold text-foreground">{latest.factors.length}</p>
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Factores</p>
+                  </div>
+                  <div className="w-px h-6 bg-border/50"></div>
+                  <div>
+                    <p className="text-xl font-bold text-[hsl(var(--high-risk))]">{latest.factors.filter((f) => f.critical).length}</p>
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Críticos</p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {result && (
-              <p className="text-xs text-muted-foreground">
-                Status: {result.previousStatus} → {result.newStatus}
-              </p>
+              <div className="bg-primary/10 border border-primary/20 p-3 rounded-lg flex items-center justify-center gap-2 text-sm text-primary">
+                <span className="font-medium text-muted-foreground">Status cambiado:</span>
+                <Badge variant="outline" className="opacity-70">{result.previousStatus}</Badge>
+                <span>→</span>
+                <Badge variant="default" className="font-bold shadow-sm">{result.newStatus}</Badge>
+              </div>
             )}
 
             {latest.factors.length > 0 ? (
-              <div>
-                <h4 className="text-sm font-medium mb-2">Desglose de factores</h4>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead>Descripción</TableHead>
-                      <TableHead className="text-right">Puntos</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {latest.factors.map((f) => (
-                      <TableRow key={f.id}>
-                        <TableCell className="text-xs text-muted-foreground capitalize">
-                          {f.category.replace(/_/g, " ")}
-                        </TableCell>
-                        <TableCell className="text-sm">{f.description}</TableCell>
-                        <TableCell
-                          className={`text-right font-mono ${
-                            f.direction === "increase"
-                              ? "text-red-600"
-                              : "text-green-600"
-                          }`}
-                        >
-                          {f.direction === "increase" ? "+" : ""}
-                          {f.points}
-                        </TableCell>
-                        <TableCell>
-                          {f.critical && (
-                            <Badge variant="destructive">Crítico</Badge>
-                          )}
-                        </TableCell>
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Desglose de factores</h4>
+                <div className="rounded-md border border-border/50 overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/20">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="w-[120px]">Categoría</TableHead>
+                        <TableHead>Descripción</TableHead>
+                        <TableHead className="text-right">Puntos</TableHead>
+                        <TableHead className="w-[100px] text-right"></TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {latest.factors.map((f) => (
+                        <TableRow key={f.id} className="hover:bg-muted/30 transition-colors">
+                          <TableCell className="text-xs text-muted-foreground font-medium capitalize">
+                            {f.category.replace(/_/g, " ")}
+                          </TableCell>
+                          <TableCell className="text-sm font-medium">{f.description}</TableCell>
+                          <TableCell
+                            className={`text-right font-mono font-bold ${
+                              f.direction === "increase"
+                                ? "text-[hsl(var(--high-risk))]"
+                                : "text-[hsl(var(--safe))]"
+                            }`}
+                          >
+                            {f.direction === "increase" ? "+" : ""}
+                            {f.points}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {f.critical && (
+                              <Badge variant="outline" className="bg-[hsl(var(--high-risk))]/10 text-[hsl(var(--high-risk))] border-[hsl(var(--high-risk))]/20">Crítico</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             ) : (
-              <p className="text-sm text-green-600">
-                Sin factores: cliente operable.
-              </p>
+              <div className="p-4 bg-[hsl(var(--safe))]/10 border border-[hsl(var(--safe))]/20 rounded-lg text-center">
+                <p className="text-sm font-bold text-[hsl(var(--safe))]">
+                  Sin factores de riesgo encontrados. Cliente 100% operable.
+                </p>
+              </div>
             )}
 
             {latest.suggestedActions.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium mb-2">Acciones sugeridas</h4>
-                <ul className="space-y-1.5">
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Acciones Sugeridas</h4>
+                <ul className="grid gap-2">
                   {latest.suggestedActions.map((a, i) => (
-                    <li key={i} className="text-sm flex items-start gap-2">
+                    <li key={i} className="flex items-start gap-3 bg-muted/20 p-3 rounded-lg border border-border/30">
                       <Badge
-                        variant={
+                        variant="outline"
+                        className={`shrink-0 uppercase text-[10px] tracking-wider ${
                           a.priority === "alta"
-                            ? "destructive"
+                            ? "bg-[hsl(var(--high-risk))]/10 text-[hsl(var(--high-risk))] border-[hsl(var(--high-risk))]/20"
                             : a.priority === "media"
-                            ? "outline"
-                            : "secondary"
-                        }
-                        className="shrink-0"
+                            ? "bg-[hsl(var(--review))]/10 text-[hsl(var(--review))] border-[hsl(var(--review))]/20"
+                            : "bg-muted text-muted-foreground border-transparent"
+                        }`}
                       >
                         {a.priority}
                       </Badge>
-                      <span>{a.action}</span>
+                      <span className="text-sm font-medium leading-tight pt-0.5">{a.action}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
-          </>
+          </div>
         )}
       </CardContent>
     </Card>
