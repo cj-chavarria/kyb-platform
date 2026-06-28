@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
   return (
@@ -13,11 +13,16 @@ export default function Home() {
           </p>
         </div>
 
+        <div>
+          <Button asChild size="lg">
+            <Link href="/expedientes/nuevo">Añadir nuevo expediente</Link>
+          </Button>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Expedientes</CardTitle>
-              <CardDescription>Crea y gestiona expedientes KYB.</CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild className="w-full">
@@ -29,16 +34,8 @@ export default function Home() {
           <Card>
             <CardHeader>
               <CardTitle>Score de riesgo</CardTitle>
-              <CardDescription>Determinista, explicable y testeable.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Motor con factores configurables: listas fiscales del SAT,
-                documentos obligatorios, vigencias, conciliación, completitud y
-                CSF del mes vigente. Decisión: <strong>safe</strong>,{" "}
-                <strong>review_required</strong> u <strong>high_risk</strong>.
-              </p>
-            </CardContent>
+            <CardContent />
           </Card>
         </div>
       </div>
